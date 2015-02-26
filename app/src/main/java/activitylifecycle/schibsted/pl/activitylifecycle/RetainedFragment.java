@@ -51,16 +51,16 @@ public class RetainedFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Log.i("RetainedFragment", "onViewCreated");
 
-        if (onCompleteExecutable != null) {
-            Log.i("RetainedFragment", "executing stacked onComplete");
-            onCompleteExecutable.execute();
-            onCompleteExecutable = null;
-        }
-
         if (onNextExecutable != null) {
             Log.i("RetainedFragment", "executing stacked onNext");
             onNextExecutable.execute();
             onNextExecutable = null;
+        }
+
+        if (onCompleteExecutable != null) {
+            Log.i("RetainedFragment", "executing stacked onComplete");
+            onCompleteExecutable.execute();
+            onCompleteExecutable = null;
         }
 
         if (onErrorExecutable != null) {
