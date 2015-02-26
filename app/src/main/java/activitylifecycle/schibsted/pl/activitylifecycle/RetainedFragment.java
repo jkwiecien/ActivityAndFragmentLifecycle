@@ -9,6 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
@@ -23,7 +26,7 @@ import rx.schedulers.Schedulers;
  */
 public class RetainedFragment extends Fragment {
 
-    private OnNextExecutable onNextExecutable;
+    private List<OnNextExecutable> onNextExecutables = new ArrayList<>();
     private OnErrorExecutable onErrorExecutable;
     private OnCompletedExecutable onCompleteExecutable;
 
@@ -51,10 +54,14 @@ public class RetainedFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Log.i("RetainedFragment", "onViewCreated");
 
-        if (onNextExecutable != null) {
-            Log.i("RetainedFragment", "executing stacked onNext");
-            onNextExecutable.execute();
-            onNextExecutable = null;
+        if (onNextExecutables.size() > 0) {
+            Iterator<OnNextExecutable> it = onNextExecutables.iterator();
+            while (it.hasNext()) {
+                Log.i("RetainedFragment", "executing stacked onNext");
+                OnNextExecutable onNextExecutable = it.next();
+                onNextExecutable.execute();
+                it.remove();
+            }
         }
 
         if (onCompleteExecutable != null) {
@@ -73,7 +80,7 @@ public class RetainedFragment extends Fragment {
     @OnClick(R.id.button)
     protected void startThreadClicked() {
         Log.i("RetainedFragment", "OnClick");
-        Observable.just(new Object())
+        Observable.from(new Object[]{new Object(), new Object()})
                 .cache()
                 .delay(5, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.newThread())
@@ -132,7 +139,7 @@ public class RetainedFragment extends Fragment {
                             onNext.execute();
                         } else {
                             Log.i("RetainedFragment", "stacking onNext");
-                            onNextExecutable = onNext;
+                            onNextExecutables.add(onNext);
                         }
                     }
                 });
